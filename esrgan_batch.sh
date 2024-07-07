@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# Function to display usage information
+usage() {
+    echo "Usage: $0 -i <input_dir> -o <output_dir>"
+    exit 1
+}
+
+# Parse command line options using getopts
+while getopts ":i:o:" opt; do
+    case $opt in
+        i) input_dir="$OPTARG" ;;
+        o) output_dir="$OPTARG" ;;
+        *) usage ;;
+    esac
+done
+
+# Check if all required options are provided
+if [ -z "$input_dir" ] || [ -z "$output_dir" ]; then
+    usage
+fi
+
 run_processing() {
     local input_dir="$1"
     local output_dir="$2"
@@ -21,7 +41,7 @@ run_processing() {
         local gpu_id=$1
         local video=$2
         local output_video=$3
-        CUDA_VISIBLE_DEVICES=$gpu_id python inference_realesrgan_video.py -i "$video" -o "$output_dir" --suffix HD -n RealESRGAN_x4plus
+        CUDA_VISIBLE_DEVICES=$gpu_id python inference_realesrgan_video.py -i "$video" -o "$output_video" --suffix HD -n RealESRGAN_x4plus
     }
 
     # Initialize an array to track GPU availability
@@ -69,5 +89,5 @@ run_processing() {
     echo "Total execution time: ${hours}h ${minutes}m ${seconds}s"
 }
 
-# Call the function with input folder and output folder
-run_processing "/workspace/ProPainter/results" "results"
+# Call the function with the provided input and output directories
+run_processing "$input_dir" "$output_dir"
